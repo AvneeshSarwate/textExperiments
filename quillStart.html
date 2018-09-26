@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+        <script type="text/javascript" src="jquery.js"></script>
+        <script type="text/javascript" src="lodashCore.js"></script>
+    </head>
+    <!-- Create the editor container -->
+    <div id="editor">
+    </div>
+
+    <!-- Include the Quill library -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <!-- Initialize Quill editor -->
+    <script>
+        // var quill = new Quill('#editor', {
+        //   theme: 'snow'
+        // });
+        function shuffle(a) {
+            var j, x, i;
+            for (i = a.length - 1; i > 0; i--) {
+                j = Math.floor(Math.random() * (i + 1));
+                x = a[i];
+                a[i] = a[j];
+                a[j] = x;
+            }
+            return a;
+        }
+
+        var countStringSeparator = "WORDCOUNTSEPARATOR";
+        function wordCounter(wordList){
+            var wordCounter = {};
+            var newWordList = [];
+            for(var i = 0; i < wordList.length; i++){
+                if(!wordCounter[wordList[i]]) wordCounter[wordList[i]] = 1;
+                else wordCounter[wordList[i]]++;
+                newWordList.push(wordList[i]+countStringSeparator+wordCounter[wordList[i]]);
+            }
+            return newWordList;
+        }
+
+        function swapCorrect(shuffledWords, orderedWords, delay){
+            var wrongWords = [];
+            var wrongWordPos = {};
+            for(var i = 0; i < shuffledWords.length; i++){
+                if(shuffledWords[i] != orderedWords[i]){
+                    wrongWords.push(shuffledWords[i]);
+                    wrongWordPos[shuffledWords[i]] = [orderedWords.indexOf(shuffledWords[i]), i];
+                }
+            }
+            if(wrongWords.length == 0) return true;
+            else {
+                var wordToCorrect = wrongWords[Math.floor(Math.random()*wrongWords.length)];
+                var wordToSwap = shuffledWords[wrongWordPos[wordToCorrect][0]];
+                shuffledWords[wrongWordPos[wordToCorrect][1]] = wordToSwap;
+                shuffledWords[wrongWordPos[wordToCorrect][0]] = wordToCorrect;
+                $("#editor").html(shuffledWords.map(word => word.split(countStringSeparator)[0]).join(" "));
+                console.log(delay);
+                setTimeout(() => swapCorrect(shuffledWords, orderedWords, delay), delay);
+            }
+        }
+
+        var startingText = 'This is a paragraph that you will slowly watch unroll into a coherent statement. Eventually, the colorings of the words and the styling of the text will be more agressive, and the animation will be much more engaging. Maybe someday, the motion of the words will have some meaningful relation to the content of the text. Until then, I hope this intrigues your interest in dynamic typography.';
+        var wordsStraight = wordCounter(startingText.split(" ")); 
+        var wordsShuffled = shuffle(_.clone(wordsStraight));
+        swapCorrect(wordsShuffled, wordsStraight, 100);
+    </script>
+</html>
